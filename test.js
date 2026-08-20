@@ -1,7 +1,3 @@
-const obj={
-    name:"Keshav thakur",
-    age:23,
-    c:"C++"
-}
-
-console.log(obj["c++"]);
+const date=new Date();
+let time=date.toLocaleString("en-IN",{day:"2-digit",month:"short"});
+console.log(time);

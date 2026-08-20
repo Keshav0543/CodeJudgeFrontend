@@ -13,6 +13,8 @@ import EditProblem from "./Pages/EditContent.jsx";
 import DeleteProblem from "./Pages/deletePage.jsx";
 import Forgotpass from "./Pages/ForgotPassword.jsx";
 import ResetPage from "./Pages/ResetPage.jsx";
+import ContestList from "./Pages/ContestList.jsx";
+import ContestDescription from "./Pages/Contestdes.jsx";
 
 function App(){
   const {isAuthenticate, loading, user}=useSelector((state)=>state.auth);
@@ -43,6 +45,8 @@ function App(){
         <Route path="/admin/deleteProblem" element={<DeleteProblem/>}></Route>
         <Route path="/forgot-password" element={<Forgotpass/>}></Route>
         <Route path="/reset-password" element={<ResetPage/>}></Route>
+        <Route path="/contestlist" element={<ContestList/>}></Route>
+        <Route path="/contest/:id" element={<ContestDescription/>}></Route>
       </Routes>
       </>
     )

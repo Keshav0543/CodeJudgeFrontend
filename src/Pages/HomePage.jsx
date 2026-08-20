@@ -135,7 +135,7 @@ function HomePage() {
         </div>
 
         <div className="flex gap-4 items-center">
-          <button className="btn btn-primary">Contests</button>
+          <button className="btn btn-primary" onClick={()=>navigate("/contestlist")}>Contests</button>
           <button className="btn btn-ghost">Problems</button>
 
           <div className="dropdown dropdown-end">
