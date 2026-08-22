@@ -1,3 +1,3 @@
 const date=new Date();
-let time=date.toLocaleString("en-IN",{day:"2-digit",month:"short"});
-console.log(time);
+const value=date.getTime()+90*60*1000;
+console.log(value);

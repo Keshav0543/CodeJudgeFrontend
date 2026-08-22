@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import axiosClient from "../utils/axiosClient.js";
 import {
@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 
 const STATUS_STYLE = {
-  Running: {
+  Live: {
     dot: "bg-emerald-400",
     text: "text-emerald-300",
     pulse: true,
-    label: "running",
+    label: "Live",
   },
   Upcoming: {
     dot: "bg-amber-400",
@@ -110,41 +110,103 @@ export default function ContestDetails() {
 
   const [contest, setContest] = useState(null);
   const [status, setStatus] = useState("Expired");
+  const [isRegistered, setIsRegistered] = useState(false); // 👈 naya: registration state
   const [searchLoading, setSearchLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    async function getContestData() {
+  const [registering, setRegistering] = useState(false); // 👈 naya
+  const [registerError, setRegisterError] = useState(""); // 👈 naya
+
+  // refetch timer ref, taaki purana timer clear kar ke naya laga sakein
+  const refetchTimerRef = useRef(null);
+
+  const getContestData = useCallback(
+    async (showLoader = true) => {
+      let cancelled = false;
       try {
-        setSearchLoading(true);
+        if (showLoader) setSearchLoading(true);
         setLoadError("");
         const result = await axiosClient.get(`/user/contest/${id}`);
-        if (!cancelled) {
-          setContest(result.data.contest);
-          setStatus(result.data.status);
+        if (cancelled) return;
+
+        setContest(result.data.contest);
+        setStatus(result.data.status);
+        setIsRegistered(!!result.data.isRegistered); // 👈 naya
+
+        // purana pending timer clear karo
+        if (refetchTimerRef.current) {
+          clearTimeout(refetchTimerRef.current);
+          refetchTimerRef.current = null;
+        }
+
+        // agar delay mila hai (Upcoming ya Running), status transition pe auto refetch lagao
+        const { delay } = result.data;
+        if (delay != null && delay >= 0) {
+          refetchTimerRef.current = setTimeout(() => {
+            getContestData(false); // background refetch, skeleton mat dikhao
+          }, delay + 1000); // 1s buffer clock drift / network ke liye
         }
       } catch (err) {
         if (!cancelled)
           setLoadError(err?.response?.data?.message || err.message);
       } finally {
-        if (!cancelled) setSearchLoading(false);
+        if (!cancelled && showLoader) setSearchLoading(false);
+      }
+      return () => {
+        cancelled = true;
+      };
+    },
+    [id],
+  );
+
+  useEffect(() => {
+    getContestData(true);
+
+    // safety net: agar timer miss ho jaye (tab background mein throttle hua),
+    // mount pe fresh state already mil jayegi upar wale call se — extra kuch nahi chahiye
+
+    return () => {
+      if (refetchTimerRef.current) {
+        clearTimeout(refetchTimerRef.current);
+        refetchTimerRef.current = null;
+      }
+    };
+  }, [id, getContestData]);
+
+  // tab wapas visible hone par bhi ek dafa check kar lo (background throttle ka safety net)
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        getContestData(false);
       }
     }
-    getContestData();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, [getContestData]);
 
   const handleEnter = useCallback(() => {
     navigate(`/contest/${id}/arena`);
   }, [navigate, id]);
 
+  // 👇 naya: register handler
+  const handleRegister = useCallback(async () => {
+    try {
+      setRegistering(true);
+      setRegisterError("");
+      await axiosClient.post("user/contest/register", { contest_id: id });
+      setIsRegistered(true);
+    } catch (err) {
+      setRegisterError(err?.response?.data?.message || err.message);
+    } finally {
+      setRegistering(false);
+    }
+  }, [id]);
+
   const countdownLabel =
     status === "Upcoming"
       ? `starts in ${formatCountdown(contest?.startTime) ?? "--:--:--"}`
-      : status === "Running"
+      : status === "Live"
         ? `ends in ${formatCountdown(contest?.endTime) ?? "--:--:--"}`
         : null;
 
@@ -205,6 +267,13 @@ export default function ContestDetails() {
                   <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-xs text-slate-300">
                     <Clock className="w-3.5 h-3.5" />
                     {countdownLabel}
+                  </div>
+                )}
+
+                {isRegistered && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-violet-500/20 bg-violet-500/[0.06] px-3 py-1.5 font-mono text-xs text-violet-300">
+                    <Users className="w-3.5 h-3.5" />
+                    you're registered
                   </div>
                 )}
               </div>
@@ -273,22 +342,44 @@ export default function ContestDetails() {
             )}
 
             {/* Action */}
-            <button
-              onClick={handleEnter}
-              disabled={status !== "Running"}
-              className={`w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-colors
-                ${
-                  status === "Running"
-                    ? "bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-                    : "bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/5"
-                }`}
-            >
-              {status === "Running"
-                ? "enter contest"
-                : status === "Upcoming"
-                  ? "not started yet"
-                  : "contest ended"}
-            </button>
+            {registerError && (
+              <div className="mb-3 rounded-md border border-red-500/20 bg-red-500/[0.04] px-3 py-2 font-mono text-xs text-red-300/80">
+                {registerError}
+              </div>
+            )}
+
+            {status === "Expired" ? (
+              <button
+                disabled
+                className="w-full rounded-md py-3 text-sm font-medium bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/5"
+              >
+                contest ended
+              </button>
+            ) : isRegistered ? (
+              status === "Live" ? (
+                <button
+                  onClick={handleEnter}
+                  className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-colors bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                >
+                  enter contest
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="w-full rounded-md py-3 text-sm font-medium bg-white/[0.03] text-slate-500 cursor-not-allowed border border-white/5"
+                >
+                  registered — contest not started yet
+                </button>
+              )
+            ) : (
+              <button
+                onClick={handleRegister}
+                disabled={registering}
+                className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-colors bg-violet-500/10 hover:bg-violet-500/15 text-violet-300 border border-violet-500/30 disabled:opacity-50"
+              >
+                {registering ? "registering..." : "register for contest"}
+              </button>
+            )}
           </>
         )}
 

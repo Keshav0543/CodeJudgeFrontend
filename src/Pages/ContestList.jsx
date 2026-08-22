@@ -30,7 +30,7 @@ const ACCENTS = {
 };
 
 const STATUS_STYLE = {
-  Running: { dot: "bg-emerald-400", text: "text-emerald-300", pulse: true, label: "running" },
+  Live: { dot: "bg-emerald-400", text: "text-emerald-300", pulse: true, label: "Live" },
   Upcoming: { dot: "bg-amber-400", text: "text-amber-300", pulse: false, label: "upcoming" },
   Expired: { dot: "bg-slate-500", text: "text-slate-400", pulse: false, label: "expired" },
 };
@@ -76,7 +76,7 @@ function ContestCard({ label, day, data, onView }) {
   const countdownLabel =
     status === "Upcoming"
       ? `starts in ${formatCountdown(contest?.startTime) ?? "--:--:--"}`
-      : status === "Running"
+      : status === "Live"
       ? `ends in ${formatCountdown(contest?.endTime) ?? "--:--:--"}`
       : null;
 
