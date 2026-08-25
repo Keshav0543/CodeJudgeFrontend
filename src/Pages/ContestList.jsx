@@ -33,6 +33,7 @@ const STATUS_STYLE = {
   Live: { dot: "bg-emerald-400", text: "text-emerald-300", pulse: true, label: "Live" },
   Upcoming: { dot: "bg-amber-400", text: "text-amber-300", pulse: false, label: "upcoming" },
   Expired: { dot: "bg-slate-500", text: "text-slate-400", pulse: false, label: "expired" },
+  "Not Available": { dot: "bg-slate-500", text: "text-slate-400", pulse: false, label: "unavailable" },
 };
 
 function useTick() {
@@ -52,8 +53,8 @@ function formatCountdown(target) {
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
   const pad = (n) => String(n).padStart(2, "0");
-  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`;
-  return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`;
+  return `${pad(h)}h:${pad(m)}m:${pad(sec)}s`;
 }
 
 function fmtDate(d) {
@@ -188,34 +189,59 @@ function CardSkeleton() {
 
 export default function ContestList() {
   const [contestdata, setContestData] = useState({
-    saturdayContest: { contest: null, status: "Expired" },
-    sundayContest: { contest: null, status: "Expired" },
+    saturdayContest: { contest: null, status: "Expired", delay: 0 },
+    sundayContest: { contest: null, status: "Expired", delay: 0 },
   });
   const [searchLoading, setSearchLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const {user}=useSelector((state)=>state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
 
+  // reusable fetcher - initial load AND auto-refresh dono isi ko call karte hain
+  const getContestData = useCallback(async () => {
+    try {
+      setLoadError("");
+      const result = await axiosClient.get("/user/contest");
+      setContestData(result.data);
+    } catch (err) {
+      setLoadError(err?.response?.data?.message || err.message);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  // initial fetch on mount
   useEffect(() => {
     let cancelled = false;
-    async function getContestData() {
-      try {
-        setSearchLoading(true);
-        setLoadError("");
-        const result = await axiosClient.get("/user/contest");
-        if (!cancelled) setContestData(result.data);
-      } catch (err) {
-        if (!cancelled) setLoadError(err?.response?.data?.message || err.message);
-      } finally {
-        if (!cancelled) setSearchLoading(false);
-      }
-    }
-    getContestData();
+    setSearchLoading(true);
+    (async () => {
+      if (!cancelled) await getContestData();
+    })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [getContestData]);
+
+  // auto-refresh: backend jo delay bhejta hai (status transition tak ka time),
+  // usi delay pe setTimeout laga ke silently refetch kar lete hain - no manual reload needed
+  useEffect(() => {
+    const timers = [];
+
+    const scheduleRefetch = (data) => {
+      if (data?.delay > 0) {
+        const t = setTimeout(() => {
+          getContestData();
+        }, data.delay + 500); // +500ms buffer, clock drift / network lag ke liye
+        timers.push(t);
+      }
+    };
+
+    scheduleRefetch(contestdata.saturdayContest);
+    scheduleRefetch(contestdata.sundayContest);
+
+    return () => timers.forEach(clearTimeout);
+  }, [contestdata, getContestData]);
 
   const handleView = useCallback(
     (id) => navigate(`/contest/${id}`),

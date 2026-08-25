@@ -51,7 +51,7 @@ function formatCountdown(target) {
   const sec = s % 60;
   const pad = (n) => String(n).padStart(2, "0");
   if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`;
-  return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+  return `${pad(h)}h:${pad(m)}m:${pad(sec)}s`;
 }
 
 function fmtDate(d) {

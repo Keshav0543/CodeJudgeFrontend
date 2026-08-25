@@ -1,8 +1,15 @@
 import { useParams, useNavigate } from "react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import axiosClient from "../utils/axiosClient.js";
-import { runCode, submitCode, fetchContestSolvedProblems } from "../Api/problemApi.jsx";
-import { TO_SUBMISSION_LANGUAGE, LANGUAGE_LABEL } from "../components/languageMap.jsx";
+import {
+  runCode,
+  submitCode,
+  fetchContestSolvedProblems,
+} from "../Api/problemApi.jsx";
+import {
+  TO_SUBMISSION_LANGUAGE,
+  LANGUAGE_LABEL,
+} from "../components/languageMap.jsx";
 import ProblemDescription from "../components/ProblemDescription.jsx";
 import CodeEditor from "../components/codeeditor.jsx";
 import TestCasePanel from "../components/testCasepanel.jsx";
@@ -20,7 +27,7 @@ function formatTime(ms) {
 }
 
 export default function BattleArena() {
-  const { id: contestId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [problems, setProblems] = useState([]); // [{ problemId: {...populated}, points }]
@@ -53,12 +60,12 @@ export default function BattleArena() {
         setLoading(true);
         setLoadError("");
         // ⚠️ apna actual startContest route/method yahan confirm kar
-        const res = await axiosClient.get(`/user/contest/${contestId}/arena`);
+        const res = await axiosClient.get(`/user/contest/${id}/arena`);
         const probs = res.data.ProblemInfo || [];
         setProblems(probs);
         setFinishTime(new Date(res.data.FinishcontestTime).getTime());
 
-        // pehle problem ke startCode se language + code init karo
+        // pehle problem ke startCode se language + code init kar
         const first = probs[0]?.problemId;
         if (first?.startCode?.length) {
           const initialCode = {};
@@ -74,7 +81,7 @@ export default function BattleArena() {
         setLoading(false);
       }
     })();
-  }, [contestId]);
+  }, [id]);
 
   // Timer tick
   useEffect(() => {
@@ -84,21 +91,23 @@ export default function BattleArena() {
 
   const refreshSolved = useCallback(async () => {
     try {
-      const res = await fetchContestSolvedProblems(contestId);
+      const res = await fetchContestSolvedProblems(id);
       // ⚠️ apne getContestSolvedProblems controller ka exact field name yahan daalna
       const ids = res.data.solvedProblemIds || res.data.solved || [];
       setSolvedIds(new Set(ids.map(String)));
     } catch (err) {
       console.error("solved list refresh failed", err);
     }
-  }, [contestId]);
+  }, [id]);
 
   useEffect(() => {
     refreshSolved();
   }, [refreshSolved]);
 
   const activeProblem = problems[activeIdx]?.problemId;
-  const availableLanguages = (activeProblem?.startCode || []).map((sc) => sc.language);
+  const availableLanguages = (activeProblem?.startCode || []).map(
+    (sc) => sc.language,
+  );
   const code = codeByLanguage[language] ?? "";
   const setCode = (value) =>
     setCodeByLanguage((prev) => ({ ...prev, [language]: value }));
@@ -153,7 +162,7 @@ export default function BattleArena() {
       const { data } = await submitCode(activeProblem._id, {
         code,
         language: TO_SUBMISSION_LANGUAGE[language] || language,
-        contest_id: contestId, // snake_case — backend controller ke saath match
+        contest_id: id, // snake_case — backend controller ke saath match
       });
       setSubmitResult(data);
       if (data.status === "Accepted") refreshSolved();
@@ -165,7 +174,7 @@ export default function BattleArena() {
   };
 
   const handleFinish = () => {
-    navigate(`/contest/${contestId}/leaderboard`);
+    navigate(`/contest/${id}/leaderboard`);
   };
 
   if (loading)
@@ -322,7 +331,9 @@ export default function BattleArena() {
                   {submitResult && (
                     <div className="rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-emerald-300">
                       <span className="text-emerald-400 font-semibold">
-                        {submitResult.status === "Accepted" ? "✓ Accepted" : `✗ ${submitResult.status}`}
+                        {submitResult.status === "Accepted"
+                          ? "✓ Accepted"
+                          : `✗ ${submitResult.status}`}
                       </span>
                     </div>
                   )}
@@ -334,7 +345,9 @@ export default function BattleArena() {
                 </div>
               )}
 
-              {bottomTab === "console" && <ConsoleOutput runResult={runResult} />}
+              {bottomTab === "console" && (
+                <ConsoleOutput runResult={runResult} />
+              )}
             </div>
           </div>
         </div>

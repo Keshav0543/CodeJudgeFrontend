@@ -16,6 +16,7 @@ import ResetPage from "./Pages/ResetPage.jsx";
 import ContestList from "./Pages/ContestList.jsx";
 import ContestDescription from "./Pages/Contestdes.jsx";
 import BattleArena from "./Pages/ArenaPage.jsx";
+import Leaderboard from "./Pages/leaderboard.jsx";
 
 function App(){
   const {isAuthenticate, loading, user}=useSelector((state)=>state.auth);
@@ -49,6 +50,7 @@ function App(){
         <Route path="/contestlist" element={<ContestList/>}></Route>
         <Route path="/contest/:id" element={<ContestDescription/>}></Route>
         <Route path="/contest/:id/arena" element={<BattleArena/>}></Route>
+        <Route path="/contest/:id/leaderboard" element={<Leaderboard/>}></Route>
       </Routes>
       </>
     )
