@@ -1,5 +1,6 @@
 import { NavLink } from "react-router";
-import { PlusCircle, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Trophy } from "lucide-react";
+import { Outlet } from "react-router";
 
 function Admin() {
   const adminOptions = [
@@ -24,6 +25,20 @@ function Admin() {
       icon: <Trash2 size={28} />,
       color: "text-rose-400 border-rose-500/30 hover:border-rose-400",
     },
+    {
+      to: "/admin/createContest",
+      title: "Create Contest",
+      desc: "Set up a new contest with problems, timing & rules",
+      icon: <Trophy size={28} />,
+      color: "text-amber-400 border-amber-500/30 hover:border-amber-400",
+    },
+    {
+      to:"/admin/deleteContest",
+      title:"Delete Contest",
+      desc: "Delete an unwanted contest, make sure this will not effect other contest",
+      icon: <Trash2 size={28}/>,
+      color: "text-rose-400 border-rose-500/30 hover:border-rose-400"
+    }
   ];
 
   return (
@@ -46,6 +61,7 @@ function Admin() {
           ))}
         </div>
       </div>
+      <Outlet />
     </div>
   );
 }

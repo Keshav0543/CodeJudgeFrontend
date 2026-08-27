@@ -1,10 +1,10 @@
-import { useState , useEffect} from "react";
-import {Routes, Route , Navigate} from "react-router";
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router";
 import HomePage from "./Pages/HomePage.jsx";
 import LoginPage from "./Pages/LoginPage.jsx";
 import Admin from "./Pages/AdminPage.jsx";
 import RegisterPage from "./Pages/RegisterPage.jsx";
-import {authenticateUser} from "../src/authSlice.js";
+import { authenticateUser } from "../src/authSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import ProblemPage from "../src/Pages/ProblemPage.jsx";
 import CreateProblem from "./Pages/CreateProb.jsx";
@@ -17,43 +17,73 @@ import ContestList from "./Pages/ContestList.jsx";
 import ContestDescription from "./Pages/Contestdes.jsx";
 import BattleArena from "./Pages/ArenaPage.jsx";
 import Leaderboard from "./Pages/leaderboard.jsx";
+import CreateContest from "./Pages/createContest.jsx";
+import IsAdmin from "./components/Admincheck.jsx";
+import DeleteContest from "./Pages/deleteContest.jsx";
 
-function App(){
-  const {isAuthenticate, loading, user}=useSelector((state)=>state.auth);
-  const dispatch=useDispatch();
-  
+function App() {
+  const { isAuthenticate, loading} = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(authenticateUser());
-  },[])
+  }, []);
 
-  if(loading){
-    return <div className="min-h-screen flex items-center justify-center">
-      <span className="loading loading-spinner loading-lg"></span>
-    </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
   }
 
-    return(
-      <>
+  return (
+    <>
       <Routes>
-        <Route path="/" element={isAuthenticate?<HomePage/>:<Navigate to={"/register"}/>}></Route>
-        <Route path="/login" element={isAuthenticate?<Navigate to={"/"}/>:<LoginPage></LoginPage>}></Route>
-        <Route path="/register" element={isAuthenticate?<Navigate to={"/"}/>:<RegisterPage></RegisterPage>}></Route>
-        <Route path="/admin" element={isAuthenticate && user?.role==="admin"?<Admin/>:<Navigate to={"/"}/>}></Route>
-        <Route path="/problem/:problemId" element={<ProblemPage/>}></Route>
-        <Route path="/admin/createProblem" element={<CreateProblem/>}></Route>
-        <Route path="/admin/updateProblem" element={<UpdateProblem/>}></Route>
-        <Route path="/admin/updateProblem/:id" element={<EditProblem/>}></Route>
-        <Route path="/admin/deleteProblem" element={<DeleteProblem/>}></Route>
-        <Route path="/forgot-password" element={<Forgotpass/>}></Route>
-        <Route path="/reset-password" element={<ResetPage/>}></Route>
-        <Route path="/contestlist" element={<ContestList/>}></Route>
-        <Route path="/contest/:id" element={<ContestDescription/>}></Route>
-        <Route path="/contest/:id/arena" element={<BattleArena/>}></Route>
-        <Route path="/contest/:id/leaderboard" element={<Leaderboard/>}></Route>
+        <Route
+          path="/"
+          element={
+            isAuthenticate ? <HomePage /> : <Navigate to={"/register"} />
+          }
+        ></Route>
+        <Route
+          path="/login"
+          element={
+            isAuthenticate ? <Navigate to={"/"} /> : <LoginPage></LoginPage>
+          }
+        ></Route>
+        <Route
+          path="/register"
+          element={
+            isAuthenticate ? (
+              <Navigate to={"/"} />
+            ) : (
+              <RegisterPage></RegisterPage>
+            )
+          }
+        ></Route>
+        <Route path="/problem/:problemId" element={<ProblemPage />}></Route>
+        <Route path="/forgot-password" element={<Forgotpass />}></Route>
+        <Route path="/reset-password" element={<ResetPage />}></Route>
+        <Route path="/contestlist" element={<ContestList />}></Route>
+        <Route path="/contest/:id" element={<ContestDescription />}></Route>
+        <Route path="/contest/:id/arena" element={<BattleArena />}></Route>
+        <Route
+          path="/contest/:id/leaderboard"
+          element={<Leaderboard />}
+        ></Route>
+        <Route element={<IsAdmin />}>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/createProblem" element={<CreateProblem />} />
+          <Route path="/admin/updateProblem" element={<UpdateProblem />} />
+          <Route path="/admin/updateProblem/:id" element={<EditProblem />} />
+          <Route path="/admin/deleteProblem" element={<DeleteProblem />} />
+          <Route path="/admin/createContest" element={<CreateContest />} />
+          <Route path="/admin/deleteContest" element={<DeleteContest/>}/>
+        </Route>
       </Routes>
-      </>
-    )
+    </>
+  );
 }
 
 export default App;
