@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Loader2,
+  Hourglass,
 } from "lucide-react";
 
 function ResultSkeleton() {
@@ -17,7 +18,8 @@ function ResultSkeleton() {
       <div className="h-4 w-32 bg-white/5 rounded mb-8" />
       <div className="rounded-lg border border-white/5 bg-[#0F131B] p-8">
         <div className="h-5 w-40 bg-white/5 rounded mb-6 mx-auto" />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="h-28 bg-white/5 rounded-lg" />
           <div className="h-28 bg-white/5 rounded-lg" />
           <div className="h-28 bg-white/5 rounded-lg" />
         </div>
@@ -55,12 +57,12 @@ export default function Leaderboard() {
     return () => {
       cancelled = true;
     };
-    // 👇 id dependency array mein hona zaroori tha — warna effect
-    // har render ke baad chalta, state update -> re-render -> loop.
   }, [id]);
 
   const points = submitdata?.points ?? 0;
   const solved = submitdata?.solved ?? 0;
+  const totalProblems = submitdata?.totalProblems ?? "--";
+  const title = submitdata?.title || "Contest";
   const message = submitdata?.message;
 
   return (
@@ -105,27 +107,18 @@ export default function Leaderboard() {
             </div>
 
             <div className="p-8">
-              <div className="flex items-center justify-center gap-2 mb-8">
+              <div className="flex items-center justify-center gap-2 mb-1">
                 <Trophy className="w-5 h-5 text-amber-300" />
                 <h1 className="text-slate-100 text-lg font-medium">
                   Your performance
                 </h1>
               </div>
+              <p className="text-center text-slate-500 text-xs font-mono mb-8">
+                {title}
+              </p>
 
               {/* stats — daisyUI stats component */}
               <div className="stats stats-vertical sm:stats-horizontal w-full bg-white/[0.02] border border-white/5 rounded-lg font-mono">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-violet-300">
-                    <Target className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-slate-500 text-[11px] uppercase tracking-wider">
-                    points
-                  </div>
-                  <div className="stat-value text-violet-300 text-3xl">
-                    {points}
-                  </div>
-                </div>
-
                 <div className="stat place-items-center">
                   <div className="stat-figure text-cyan-300">
                     <CheckCircle2 className="w-6 h-6" />
@@ -135,20 +128,46 @@ export default function Leaderboard() {
                   </div>
                   <div className="stat-value text-cyan-300 text-3xl">
                     {solved}
+                    <span className="text-slate-600 text-lg"> / {totalProblems}</span>
+                  </div>
+                </div>
+
+                <div className="stat place-items-center">
+                  <div className="stat-figure text-violet-300">
+                    <Target className="w-6 h-6" />
+                  </div>
+                  <div className="stat-title text-slate-500 text-[11px] uppercase tracking-wider">
+                    score
+                  </div>
+                  <div className="stat-value text-violet-300 text-3xl">
+                    {points}
+                  </div>
+                </div>
+
+                <div className="stat place-items-center">
+                  <div className="stat-figure text-slate-500">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <div className="stat-title text-slate-500 text-[11px] uppercase tracking-wider">
+                    rank
+                  </div>
+                  <div className="stat-value text-slate-500 text-3xl">
+                    --
                   </div>
                 </div>
               </div>
 
-              {solved === 0 ? (
-                <div className="mt-6 rounded-md border border-white/5 bg-white/[0.02] px-4 py-3 text-center">
-                  <span className="font-mono text-xs text-slate-500">
-                    // {message || "nothing solved yet"}
-                  </span>
-                </div>
-              ) : (
-                <div className="mt-6 text-center">
-                  <span className="font-mono text-xs text-slate-500">
-                    {message}
+              <div className="mt-6 flex items-center justify-center gap-2 rounded-md border border-amber-400/20 bg-amber-400/[0.04] px-4 py-3 text-center">
+                <Hourglass className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <span className="font-mono text-xs text-amber-200/80">
+                  Rank will be available after contest ends.
+                </span>
+              </div>
+
+              {message && (
+                <div className="mt-4 text-center">
+                  <span className="font-mono text-xs text-slate-600">
+                    // {message}
                   </span>
                 </div>
               )}

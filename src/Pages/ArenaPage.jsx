@@ -59,13 +59,11 @@ export default function BattleArena() {
       try {
         setLoading(true);
         setLoadError("");
-        // ⚠️ apna actual startContest route/method yahan confirm kar
         const res = await axiosClient.get(`/user/contest/${id}/arena`);
         const probs = res.data.ProblemInfo || [];
         setProblems(probs);
         setFinishTime(new Date(res.data.FinishcontestTime).getTime());
 
-        // pehle problem ke startCode se language + code init kar
         const first = probs[0]?.problemId;
         if (first?.startCode?.length) {
           const initialCode = {};
@@ -75,6 +73,8 @@ export default function BattleArena() {
           setCodeByLanguage(initialCode);
           setLanguage(first.startCode[0].language);
         }
+
+        await refreshSolved(); // 👈 ab arena entry ke baad hi call hoga
       } catch (err) {
         setLoadError(err?.response?.data?.message || err.message);
       } finally {
@@ -92,6 +92,7 @@ export default function BattleArena() {
   const refreshSolved = useCallback(async () => {
     try {
       const res = await fetchContestSolvedProblems(id);
+      console.log("solved API response:", res.data);
       // ⚠️ apne getContestSolvedProblems controller ka exact field name yahan daalna
       const ids = res.data.solvedProblemIds || res.data.solved || [];
       setSolvedIds(new Set(ids.map(String)));
@@ -165,6 +166,7 @@ export default function BattleArena() {
         contest_id: id, // snake_case — backend controller ke saath match
       });
       setSubmitResult(data);
+      console.log(data);
       if (data.status === "Accepted") refreshSolved();
     } catch (err) {
       setActionError(err?.response?.data || err.message);
