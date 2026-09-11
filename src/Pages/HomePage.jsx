@@ -151,7 +151,7 @@ function HomePage() {
                 <a>{user?.firstName}</a>
               </li>
               <li>
-                <a>Profile</a>
+                <a onClick={()=>navigate(`/profile/u/${user?.firstName}`)}>Profile</a>
               </li>
                {user?.role === "admin" && (
                 <li>

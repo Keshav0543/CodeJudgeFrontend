@@ -15,11 +15,15 @@ import Forgotpass from "./Pages/ForgotPassword.jsx";
 import ResetPage from "./Pages/ResetPage.jsx";
 import ContestList from "./Pages/ContestList.jsx";
 import ContestDescription from "./Pages/Contestdes.jsx";
+import isUser from "./components/Usercheck.jsx";
 import BattleArena from "./Pages/ArenaPage.jsx";
 import Leaderboard from "./Pages/leaderboard.jsx";
 import CreateContest from "./Pages/createContest.jsx";
 import IsAdmin from "./components/Admincheck.jsx";
 import DeleteContest from "./Pages/deleteContest.jsx";
+import ProfilePage from "./Pages/Profilepage.jsx";
+import UpdateProfile from "./Pages/UpdateProfile.jsx";
+import IsUser from "./components/Usercheck.jsx";
 
 function App() {
   const { isAuthenticate, loading} = useSelector((state) => state.auth);
@@ -62,12 +66,16 @@ function App() {
             )
           }
         ></Route>
-        <Route path="/problem/:problemId" element={<ProblemPage />}></Route>
-        <Route path="/forgot-password" element={<Forgotpass />}></Route>
-        <Route path="/reset-password" element={<ResetPage />}></Route>
-        <Route path="/contestlist" element={<ContestList />}></Route>
-        <Route path="/contest/:id" element={<ContestDescription />}></Route>
-        <Route path="/contest/:id/arena" element={<BattleArena />}></Route>
+        <Route element={<IsUser/>}>
+        <Route path="/problem/:problemId" element={<ProblemPage />}/>
+        <Route path="/forgot-password" element={<Forgotpass />}/>
+        <Route path="/reset-password" element={<ResetPage />}/>
+        <Route path="/contestlist" element={<ContestList />}/>
+        <Route path="/contest/:id" element={<ContestDescription />}/>
+        <Route path="/contest/:id/arena" element={<BattleArena />}/>
+        <Route path="/profile/u/:name" element={<ProfilePage/>}/>
+        <Route path="/setting/profile" element={<UpdateProfile/>}></Route>
+        </Route>
         <Route
           path="/contest/:id/leaderboard"
           element={<Leaderboard />}
