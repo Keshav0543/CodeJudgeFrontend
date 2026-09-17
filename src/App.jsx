@@ -24,6 +24,7 @@ import DeleteContest from "./Pages/deleteContest.jsx";
 import ProfilePage from "./Pages/Profilepage.jsx";
 import UpdateProfile from "./Pages/UpdateProfile.jsx";
 import IsUser from "./components/Usercheck.jsx";
+import AdminEditorial from "./components/Editorial.jsx";
 
 function App() {
   const { isAuthenticate, loading} = useSelector((state) => state.auth);
@@ -88,6 +89,7 @@ function App() {
           <Route path="/admin/deleteProblem" element={<DeleteProblem />} />
           <Route path="/admin/createContest" element={<CreateContest />} />
           <Route path="/admin/deleteContest" element={<DeleteContest/>}/>
+          <Route path="/admin/create/Editorial" element={<AdminEditorial/>}/>
         </Route>
       </Routes>
     </>

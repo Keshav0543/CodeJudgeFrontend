@@ -117,7 +117,7 @@ function UpdateProfile() {
       const res = await axiosClient.get("/user/getProfile");
       setUserData(res.data);
     } catch (err) {
-      setError(err?.response?.data?.message || "Profile load nahi ho paya, try again");
+      setError(err?.response?.data?.message || "Something went wrong, try again");
     } finally {
       setLoading(false);
     }
