@@ -8,6 +8,7 @@ import TestCasePanel from "../components/testCasepanel.jsx";
 import ConsoleOutput from "../components/consoleOutput.jsx";
 import SubmissionTable from "../components/submissiontable.jsx";
 import axiosClient from "../utils/axiosClient.js";
+import Editorial from "./Editorial.jsx";
 
 const DIFFICULTY_STYLE = {
   easy: { dot: "bg-emerald-400", text: "text-emerald-400", ring: "ring-emerald-400/30" },
@@ -166,7 +167,9 @@ function ProblemPage() {
       }
     }
 
-    if (problemId) load();
+    if (problemId) {
+      load();
+    }
     return () => {
       cancelled = true;
     };
@@ -198,7 +201,6 @@ function ProblemPage() {
         setLoadError("");
         const {data}=await GetSubmissionsDetails(problemId);
         if(cancelled)return;
-        console.log(data);
         setpastsubmit(data);
       }
       catch(err){
@@ -253,8 +255,6 @@ function ProblemPage() {
     setLeftTab("verdict");
     try {
       const { data } = await submitCode(problemId, buildPayload());
-    console.log("submitResult:", data);         
-    console.log("status value:", data.status); 
       setSubmitResult(data);
       const {data:history}=await GetSubmissionsDetails(problemId);
       setpastsubmit(history);
@@ -413,11 +413,7 @@ function ProblemPage() {
             {leftTab === "submissions" && (
               <SubmissionTable submitResult={pastsubmit} />
             )}
-            {leftTab === "Editorial" && (
-              <p className="cj-mono text-sm text-[#6B7686]">
-                // editorial not written yet
-              </p>
-            )}
+            {leftTab === "Editorial" && <Editorial/>}
             {leftTab === "verdict" && (
               <SubmissionVerdict
                 submitting={submitting}

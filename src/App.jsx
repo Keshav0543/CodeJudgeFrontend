@@ -15,7 +15,6 @@ import Forgotpass from "./Pages/ForgotPassword.jsx";
 import ResetPage from "./Pages/ResetPage.jsx";
 import ContestList from "./Pages/ContestList.jsx";
 import ContestDescription from "./Pages/Contestdes.jsx";
-import isUser from "./components/Usercheck.jsx";
 import BattleArena from "./Pages/ArenaPage.jsx";
 import Leaderboard from "./Pages/leaderboard.jsx";
 import CreateContest from "./Pages/createContest.jsx";
@@ -75,7 +74,7 @@ function App() {
         <Route path="/contest/:id" element={<ContestDescription />}/>
         <Route path="/contest/:id/arena" element={<BattleArena />}/>
         <Route path="/profile/u/:name" element={<ProfilePage/>}/>
-        <Route path="/setting/profile" element={<UpdateProfile/>}></Route>
+        <Route path="/setting/profile" element={<UpdateProfile/>}/>
         </Route>
         <Route
           path="/contest/:id/leaderboard"
@@ -89,7 +88,7 @@ function App() {
           <Route path="/admin/deleteProblem" element={<DeleteProblem />} />
           <Route path="/admin/createContest" element={<CreateContest />} />
           <Route path="/admin/deleteContest" element={<DeleteContest/>}/>
-          <Route path="/admin/create/Editorial" element={<AdminEditorial/>}/>
+          <Route path="/admin/create/Editorial/:problemId" element={<AdminEditorial/>}/>
         </Route>
       </Routes>
     </>

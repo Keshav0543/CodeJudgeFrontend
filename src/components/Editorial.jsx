@@ -1,13 +1,15 @@
 import { useState } from "react";
 import axios from "../utils/axiosClient.js";
 import axiosPlain from "axios";  
+import { useParams, useNavigate} from "react-router";
 
 const LANGUAGES = ["java", "cpp", "javascript"];
 const MAX_IMAGE_MB = 10;
-const MAX_VIDEO_MB = 100;
+const MAX_VIDEO_MB = 500;
 
 function AdminEditorial() {
-  const [problemId, setProblemId] = useState("");
+  const {problemId}=useParams();
+  const navigate=useNavigate();
   const [title, setTitle] = useState("");
   const [sections, setSections] = useState([{ heading: "", content: "" }]);
   const [languages, setLanguages] = useState([{ language: "cpp", code: "" }]);
@@ -151,13 +153,8 @@ function AdminEditorial() {
         sections,
         media,
       });
-      console.log(response.data.editorial);
       setSuccess("Editorial created successfully.");
-      setProblemId("");
-      setTitle("");
-      setSections([{ heading: "", content: "" }]);
-      setLanguages([{ language: "cpp", code: "" }]);
-      setMedia([]);
+      navigate(-1)
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create editorial.");
     } finally {
@@ -196,18 +193,6 @@ function AdminEditorial() {
           {/* Basic info */}
           <div className="card bg-[#161b22] border border-gray-800 shadow-lg">
             <div className="card-body gap-4">
-              <div>
-                <label className="label">
-                  <span className="label-text text-gray-300">Problem ID</span>
-                </label>
-                <input
-                  className="input input-bordered w-full bg-[#0d1117] border-gray-700 focus:border-teal-500"
-                  value={problemId}
-                  onChange={(e) => setProblemId(e.target.value)}
-                  placeholder="Mongo ObjectId of the problem"
-                />
-              </div>
-
               <div>
                 <label className="label">
                   <span className="label-text text-gray-300">Title</span>
