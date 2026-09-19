@@ -16,6 +16,7 @@ const LoginSchema = z.object({
 
 function LoginPage() {
   const [showPassword, setshowPassword] = useState(false);
+  const [rememberme,setRememberMe]=useState(false);
   const {
     register,
     handleSubmit,
@@ -33,6 +34,7 @@ function LoginPage() {
   }, [isAuthenticate]);
 
   function onSubmit(data) {
+    data.rememberme=rememberme;
     dispatch(loginUser(data));
   }
 
@@ -111,6 +113,7 @@ function LoginPage() {
                 <input
                   type="checkbox"
                   className="checkbox checkbox-primary checkbox-sm"
+                  onChange={()=>setRememberMe(!rememberme)}
                 />
                 Remember me
               </label>
